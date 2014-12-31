@@ -59,6 +59,9 @@ namespace Sharpness
         // Tipo de TV (0 = NTSC, 1 = PAL)
         byte TVSystem;
 
+        // Auxiliar para decodificação do Opcode com mais de um argumento
+        ushort argop;
+
         DispatcherTimer timer;
 
         public MainWindow()
@@ -388,6 +391,7 @@ namespace Sharpness
 
                 case 0x86:
                     txtDebug.Text += "STX - Store X Register | Zero Page";
+                    mem[PC + 1] = X; //Probably works like this. I gotta get used to the variables declared.
                     PC+=2;
                     break;
                 
@@ -423,6 +427,8 @@ namespace Sharpness
 
                 case 0x8E:
                     txtDebug.Text += "STX - Store X Register | Absolute";
+                    argop =(ushort)((mem[PC+1] << 8) + (mem[PC+2]));
+                    mem[argop] = X;
                     PC+=3;
                     break;
 
@@ -448,6 +454,7 @@ namespace Sharpness
 
                 case 0x96:
                     txtDebug.Text += "STX - Store X Register | Zero Page with Y offset";
+                    mem[(PC + 1) + Y] = X;
                     PC+=2;
                     break;
 
