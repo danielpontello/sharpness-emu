@@ -386,6 +386,11 @@ namespace Sharpness
                     PC += 2;
                     break;
 
+                case 0x86:
+                    txtDebug.Text += "STX - Store X Register | Zero Page";
+                    PC+=2;
+                    break;
+                
                 case 0x88:
                     txtDebug.Text += "DEY - Decrement Y | Implied \n";
                     Y--;
@@ -416,6 +421,11 @@ namespace Sharpness
                     PC += 3;
                     break;
 
+                case 0x8E:
+                    txtDebug.Text += "STX - Store X Register | Absolute";
+                    PC+=3;
+                    break;
+
                 case 0x90:
                     txtDebug.Text += "BCC - Branch on Carry Clear | Implicit \n";
                     PC += 2;
@@ -434,6 +444,11 @@ namespace Sharpness
                 case 0x95:
                     txtDebug.Text += "STA - Store Accumulator | Zero Page with X offset \n";
                     PC += 2;
+                    break;
+
+                case 0x96:
+                    txtDebug.Text += "STX - Store X Register | Zero Page with Y offset";
+                    PC+=2;
                     break;
 
                 case 0x98:

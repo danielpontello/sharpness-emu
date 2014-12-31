@@ -24,3 +24,6 @@ C:\Users\Daniel\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness_Mar
 C:\Users\Daniel\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.g.resources
 C:\Users\Daniel\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.Properties.Resources.resources
 C:\Users\Daniel\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.csproj.GenerateResource.Cache
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\bin\Debug\Sharpness.exe.config
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.exe
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.pdb
