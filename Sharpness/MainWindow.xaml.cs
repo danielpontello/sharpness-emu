@@ -71,7 +71,8 @@ namespace Sharpness
 
         void timer_Tick(object sender, EventArgs e)
         {
-            Dispatcher.BeginInvoke(new Action(() => {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
                 txtDebug.Text = "Opcode: " + mem[PC].ToString("X2") + "\n";
                 txtDebug.Text += "PC: " + PC.ToString("X4") + "\n";
                 Emulate();
@@ -83,11 +84,11 @@ namespace Sharpness
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.RestoreDirectory = true;
 
-            if(fileDialog.ShowDialog() == true)
+            if (fileDialog.ShowDialog() == true)
             {
-                if(File.Exists(fileDialog.FileName))
+                if (File.Exists(fileDialog.FileName))
                 {
-                    using(BinaryReader reader = new BinaryReader(File.Open(fileDialog.FileName, FileMode.Open)))
+                    using (BinaryReader reader = new BinaryReader(File.Open(fileDialog.FileName, FileMode.Open)))
                     {
                         byte[] header = reader.ReadBytes(16);
                         PRGSize = header[4];
@@ -104,7 +105,16 @@ namespace Sharpness
 
                         InitVM();
 
-                        if (PRGSize == 2)
+                        if (PRGSize == 1)
+                        {
+                            for (int i = 0; i < PRG.Length; i++)
+                            {
+                                info += "PRG Size = " + PRGSize + "; Mirroring PRG...";
+                                mem[0x8000 + i] = PRG[i];
+                                mem[0xC000 + i] = PRG[i];
+                            }
+                        }
+                        else if (PRGSize == 2)
                         {
                             info += "PRG Size = " + PRGSize + "; Not mirroring PRG...";
                             for (int i = 0; i < PRG.Length; i++)
@@ -114,13 +124,12 @@ namespace Sharpness
                         }
                         else
                         {
-                            for (int i = 0; i < PRG.Length; i++)
+                            for (int i = 0; i < (0x10000 - 0x8000); i++)
                             {
-                                info += "PRG Size = " + PRGSize + "; Mirroring PRG...";
                                 mem[0x8000 + i] = PRG[i];
-                                mem[0xC000 + i] = PRG[i];
                             }
                         }
+
 
                         txtDebug.Text = info;
                     }
@@ -136,7 +145,7 @@ namespace Sharpness
             P = 0x34;
             PC = 0x08000;
 
-            for(int i=0x0000; i<0x07FF; i++)
+            for (int i = 0x0000; i < 0x07FF; i++)
             {
                 mem[i] = 0xFF;
             }
@@ -144,7 +153,9 @@ namespace Sharpness
 
         private void btnStep_Click(object sender, RoutedEventArgs e)
         {
-            Emulate();            
+            txtDebug.Text = "Opcode: " + mem[PC].ToString("X2") + "\n";
+            txtDebug.Text += "PC: " + PC.ToString("X4") + "\n";
+            Emulate();
         }
 
         private void Emulate()
