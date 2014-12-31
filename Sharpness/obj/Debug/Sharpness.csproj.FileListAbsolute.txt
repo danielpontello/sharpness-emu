@@ -27,3 +27,13 @@ C:\Users\Daniel\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.csp
 C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\bin\Debug\Sharpness.exe.config
 C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.exe
 C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.pdb
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.csprojResolveAssemblyReference.cache
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\MainWindow.baml
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\MainWindow.g.cs
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\App.g.cs
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness_MarkupCompile.cache
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.g.resources
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.Properties.Resources.resources
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\obj\Debug\Sharpness.csproj.GenerateResource.Cache
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\bin\Debug\Sharpness.exe
+C:\Users\Silverhawk\Documents\GitHub\sharpness-emu\Sharpness\bin\Debug\Sharpness.pdb

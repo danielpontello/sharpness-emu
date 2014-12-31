@@ -384,6 +384,12 @@ namespace Sharpness
                     PC += 2;
                     break;
 
+                case 0x84:
+                    txtDebug.Text += "STY - Store Y register | Zero Page";
+                    mem[PC+1]=Y;
+                    PC+=2;
+                    break;
+
                 case 0x85:
                     txtDebug.Text += "STA - Store Accumulator | Zero Page \n";
                     PC += 2;
@@ -417,6 +423,8 @@ namespace Sharpness
 
                 case 0x8C:
                     txtDebug.Text += "STY - Store Y | Absolute \n";
+                    argop = (ushort)((mem[PC + 1] << 8) + (mem[PC + 2]));
+                    mem[argop] = Y;
                     PC += 3;
                     break;
 
@@ -444,6 +452,7 @@ namespace Sharpness
 
                 case 0x94:
                     txtDebug.Text += "STY - Store Y | Zero Page, X \n";
+                    mem[(PC+1) + X]=Y;
                     PC += 2;
                     break;
 
