@@ -19,17 +19,26 @@ namespace Sharpness
     /// </summary>
     public partial class Log : Window
     {
+        public event Action<bool> resetBit;
         public Log()
         {
             InitializeComponent();
+            dbgText.Text = "Initialized..\n";
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        public void LogMessage(string message)
         {
-            Application curApp = Application.Current;
-            Window mainWindow = curApp.MainWindow;
-            this.Left = mainWindow.Left + (mainWindow.ActualWidth - this.ActualWidth) / 2;
-            this.Top = mainWindow.Top + (mainWindow.ActualHeight - this.ActualHeight) / 2;
+            dbgText.Text += message + "\n";
+            dbgText.ScrollToEnd();
+        }
+
+        private void logWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if(resetBit != null)
+            {
+                resetBit(false);
+            }
+            
         }
     }
 }

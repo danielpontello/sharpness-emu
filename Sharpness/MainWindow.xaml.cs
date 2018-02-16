@@ -66,32 +66,31 @@ namespace Sharpness
 
         DispatcherTimer timer;
         Log logwin;
-        bool logOpen = true;
+
+        //Tells whether log window is visible or not
+        bool logOpen = false;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            logwin = new Log();
-            logwin.Show();
-            logwin.Left = this.Left + (this.ActualWidth);
-            logwin.Top = this.Top;
-
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(100);
             timer.Tick += timer_Tick;
+            
+        }
+
+        private void Logwin_resetBit(bool obj)
+        {
+            //Update from another thread
+            logOpen = false;
         }
 
         private void MainWindow1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            try
+            if (logOpen)
             {
                 logwin.Close();
-            }
-            catch (Exception)
-            {
-
-                throw;
             }
         }
 
@@ -99,7 +98,12 @@ namespace Sharpness
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                //txtDebug.Text = "Opcode: " + mem[PC].ToString("X2") + "\n";
+                if (logOpen)
+                {
+                    logwin.LogMessage("Opcode: " + mem[PC].ToString("X2"));
+                    logwin.LogMessage("PC: " + PC.ToString("X4"));
+                }
+                    
                 //txtDebug.Text += "PC: " + PC.ToString("X4") + "\n";
                 Emulate();
             }));
@@ -108,6 +112,35 @@ namespace Sharpness
         private void Window(object sender, EventArgs e)
         {
 
+        }
+
+
+        private void viewLog_Checked(object sender, RoutedEventArgs e)
+        {
+            logwin = new Log();
+            logwin.Show();
+            Application curApp = Application.Current;
+            Window mainWindow = curApp.MainWindow;
+            logwin.Left = mainWindow.Left + (mainWindow.ActualWidth);
+            logwin.Top = mainWindow.Top;
+            logOpen = true;
+            logwin.resetBit += Logwin_resetBit;
+        }
+
+        private void runCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            timer.Start();
+        }
+
+        private void runCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            timer.Stop();
+        }
+
+        private void viewLog_Unchecked(object sender, RoutedEventArgs e)
+        {
+            logwin.Close();
+            logOpen = false;
         }
 
         private void Window_Loaded(object sender, EventArgs e)
@@ -182,7 +215,10 @@ namespace Sharpness
                             }
                         }
 
-
+                        if (logOpen)
+                        {
+                            logwin.LogMessage(info);
+                        }
                         //txtDebug.Text = info;
                     }
                 }
@@ -832,9 +868,6 @@ namespace Sharpness
             }
         }
 
-        private void btnRun_Click(object sender, RoutedEventArgs e)
-        {
-            timer.Start();
-        }
+
     }
 }

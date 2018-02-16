@@ -9,9 +9,12 @@
                 <Separator/>
                 <MenuItem Header="Exit"/>
             </MenuItem>
+            <MenuItem x:Name="viewLog" Header="View" Checked="viewLog_Checked" Unchecked="viewLog_Unchecked">
+                <MenuItem Header="Log" IsCheckable="True"/>
+            </MenuItem>
         </Menu>
         <StatusBar HorizontalAlignment="Left" Height="20" Margin="0,342,0,0" VerticalAlignment="Top" Width="600">
-            <CheckBox Content="Run" IsEnabled="False"/>
+            <CheckBox x:Name="runCheckbox" Content="Run" Checked="runCheckbox_Checked" Unchecked="runCheckbox_Unchecked"/>
         </StatusBar>
     </Grid>
 </Window>
