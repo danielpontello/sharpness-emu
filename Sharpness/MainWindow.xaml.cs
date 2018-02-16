@@ -174,7 +174,7 @@ namespace Sharpness
                         CHRSize = header[5];
                         byte romControl1 = header[6];
                         byte romControl2 = header[7];
-                        short romControl = (short)((romControl1 >> 2) + header[7]);
+                        short romControl = (short)((header[7] >> 2) + header[6]);
                         PRGRamSize = header[8];
                         TVSystem = header[9];
 
