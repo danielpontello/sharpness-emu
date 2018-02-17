@@ -29,6 +29,16 @@ namespace Sharpness
             
         }
 
+        public void EnableModuleSubscriptions()
+        {
+            ((MainWindow)Application.Current.MainWindow).emulator.LogExternal += Emulator_LogExternal;
+        }
+
+        private void Emulator_LogExternal(string obj)
+        {
+            this.LogMessage(obj);
+        }
+
         public void LogMessage(string message)
         {
             logMessages.Add(message);

@@ -25,7 +25,8 @@ namespace Sharpness
     {
 
         DispatcherTimer timer;
-        Log logwin;
+        public Log logwin;
+        public Disassembler disac;
 
         //Tells whether log window is visible or not
         bool logOpen = false;
@@ -34,7 +35,7 @@ namespace Sharpness
         GameCart game;
 
         //Load CPU core
-        CPU emulator;
+        public CPU emulator;
 
         public MainWindow()
         {
@@ -44,6 +45,10 @@ namespace Sharpness
             timer.Interval = TimeSpan.FromMilliseconds(100);
             timer.Tick += timer_Tick;
 
+
+            if (logOpen) logwin.EnableModuleSubscriptions();
+            disac = new Disassembler();
+            disac.Show();
         }
 
         private void Logwin_resetBit(bool obj)
@@ -92,10 +97,6 @@ namespace Sharpness
             logwin.resetBit += Logwin_resetBit;
         }
 
-        private void Emulator_LogExternal(string obj)
-        {
-            logwin.LogMessage(obj);
-        }
 
         private void runCheckbox_Checked(object sender, RoutedEventArgs e)
         {
@@ -172,7 +173,6 @@ namespace Sharpness
                 }
             }
             //End of ROM read and memory setup
-            emulator.LogExternal += Emulator_LogExternal;
             emulator.InitVM();
         }
 

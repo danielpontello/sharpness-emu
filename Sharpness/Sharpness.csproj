@@ -53,6 +53,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Disassembler.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Log.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -66,6 +70,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CPU.cs" />
+    <Compile Include="Disassembler.xaml.cs">
+      <DependentUpon>Disassembler.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GameCart.cs" />
     <Compile Include="Log.xaml.cs">
       <DependentUpon>Log.xaml</DependentUpon>

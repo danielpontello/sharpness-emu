@@ -10,6 +10,7 @@ namespace Sharpness
     {
         //Internals
         public event Action<string> LogExternal;
+        public event Action<byte[], ushort> CpuStats;
 
         // 6502 ---------------------------------------------
         // Acumulador
@@ -43,6 +44,11 @@ namespace Sharpness
             {
                 LogExternal("Opcode: " + mem[PC].ToString("X2"));
                 LogExternal("PC: " + PC.ToString("X4"));
+            }
+
+            if(CpuStats != null)
+            {
+                CpuStats(mem, PC);
             }
 
             switch (mem[PC])
