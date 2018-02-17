@@ -7,10 +7,13 @@
             <MenuItem Header="File" Height="21" Width="33">
                 <MenuItem x:Name="loadRom_btn" Header="Load ROM..." Click="btnLoad_Click"/>
                 <Separator/>
-                <MenuItem Header="Exit"/>
+                <MenuItem Header="Exit" Click="MenuItem_Click"/>
             </MenuItem>
             <MenuItem x:Name="viewLog" Header="View" Checked="viewLog_Checked" Unchecked="viewLog_Unchecked">
-                <MenuItem Header="Log" IsCheckable="True"/>
+                <MenuItem Header="Log" IsCheckable="True" IsChecked="True"/>
+            </MenuItem>
+            <MenuItem Header="Misc">
+                <MenuItem Header="Step emulation" Click="MenuItem_Click_1"/>
             </MenuItem>
         </Menu>
         <StatusBar HorizontalAlignment="Left" Height="20" Margin="0,342,0,0" VerticalAlignment="Top" Width="600">

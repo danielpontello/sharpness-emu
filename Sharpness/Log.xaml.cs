@@ -19,17 +19,43 @@ namespace Sharpness
     /// </summary>
     public partial class Log : Window
     {
+        private List<string> logMessages;
         public event Action<bool> resetBit;
         public Log()
         {
             InitializeComponent();
+            logMessages = new List<string>();
             dbgText.Text = "Initialized..\n";
+            
         }
 
         public void LogMessage(string message)
         {
-            dbgText.Text += message + "\n";
+            logMessages.Add(message);
+            dbgText.Text = GenerateString();
             dbgText.ScrollToEnd();
+        }
+
+        private string GenerateString()
+        {
+            string finalmessage = "";
+            int size = 0;
+
+            //Render a maximum of 120 messages on log
+            if (logMessages.Count > 120)
+            {
+                size = 120;
+            }
+            else
+            {
+                size = logMessages.Count;
+            }
+
+            for (int i = 0; i < size; i++)
+            {
+                finalmessage += logMessages[i] + "\n";
+            }
+            return finalmessage;
         }
 
         private void logWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

@@ -5,11 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Sharpness"
         mc:Ignorable="d"
-        Title="Log" Height="300" Width="300" ResizeMode="NoResize" ShowInTaskbar="False" Closing="logWindow_Closing">
+        Title="Log" Height="294.566" Width="464.831" ResizeMode="NoResize" ShowInTaskbar="True" Closing="logWindow_Closing">
     <Grid Background="#FF232323">
         <TextBox x:Name="dbgText" 
-         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
          ScrollViewer.VerticalScrollBarVisibility="Auto"
+         TextWrapping="WrapWithOverflow"
          ScrollViewer.CanContentScroll="True" Margin="6,5,6.34,6.698" Background="#FF2F2E2E" Foreground="#FF7BC6E7" BorderBrush="#FF272728" Text="Debugger" FontSize="14" Focusable="False" IsInactiveSelectionHighlightEnabled="True" IsReadOnlyCaretVisible="True"/>
     </Grid>
 </Window>
