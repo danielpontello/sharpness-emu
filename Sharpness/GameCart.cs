@@ -76,7 +76,7 @@ namespace Sharpness
             this.HasTrainer = Convert.ToBoolean(arr1[2]);
             this.Use4Screen = Convert.ToBoolean(arr1[3]);
             //Bitwise magic (untested)
-            this.MapperNumber = (((arr1[4] + arr1[5] + arr1[6] + arr1[7]) & 0b00001111) << 4) + ((arr2[4] + arr2[5] + arr2[6] + arr2[7]) & 0b00001111);
+            this.MapperNumber = (((arr1[4] + arr1[5] + arr1[6] + arr1[7]) & 0b00001111) << 4) | ((arr2[4] + arr2[5] + arr2[6] + arr2[7]) & 0b00001111);
 
             //RAM bank check
             if (header[8] == 0)

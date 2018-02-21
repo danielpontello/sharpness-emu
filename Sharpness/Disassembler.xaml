@@ -18,6 +18,25 @@
         <Label Content="Memory" HorizontalAlignment="Left" Margin="10,4,0,0" VerticalAlignment="Top" Foreground="#FFCECECE"/>
         <Label Content="PC: " HorizontalAlignment="Left" Margin="269,28,0,0" VerticalAlignment="Top" Foreground="#FFECECEC"/>
         <TextBox x:Name="PCBox" HorizontalAlignment="Left" Height="22" Margin="297,30,0,0" TextWrapping="Wrap" Text="FF" VerticalAlignment="Top" Width="47"/>
+        <TextBox x:Name="carryFlag" HorizontalAlignment="Left" Height="23" Margin="550,52,0,0" TextWrapping="Wrap" Text="true" VerticalAlignment="Top" Width="37"/>
+        <Label Content="Flags" HorizontalAlignment="Left" Margin="521,13,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label Content="Carry" HorizontalAlignment="Left" Margin="511,51,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <TextBox x:Name="zeroFlag" HorizontalAlignment="Left" Height="23" Margin="550,80,0,0" TextWrapping="Wrap" Text="01" VerticalAlignment="Top" Width="37"/>
+        <TextBox x:Name="interruptDisableFlag" HorizontalAlignment="Left" Height="23" Margin="550,108,0,0" TextWrapping="Wrap" Text="01" VerticalAlignment="Top" Width="37"/>
+        <TextBox x:Name="decimalModeFlag" HorizontalAlignment="Left" Height="23" Margin="550,136,0,0" TextWrapping="Wrap" Text="01" VerticalAlignment="Top" Width="37"/>
+        <TextBox x:Name="overflowFlag" HorizontalAlignment="Left" Height="23" Margin="550,164,0,0" TextWrapping="Wrap" Text="01" VerticalAlignment="Top" Width="37"/>
+        <TextBox x:Name="negativeFlag" HorizontalAlignment="Left" Height="23" Margin="550,192,0,0" TextWrapping="Wrap" Text="01" VerticalAlignment="Top" Width="37"/>
+        <Label Content="Zero" HorizontalAlignment="Left" Margin="511,79,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label Content="Interrupts disabled" HorizontalAlignment="Left" Margin="447,107,0,0" VerticalAlignment="Top" Foreground="White" Width="103"/>
+        <Label Content="Decimal" HorizontalAlignment="Left" Margin="500,135,0,0" VerticalAlignment="Top" Foreground="White" Width="60"/>
+        <Label Content="Overflow" HorizontalAlignment="Left" Margin="496,163,0,0" VerticalAlignment="Top" Foreground="White" Width="64"/>
+        <Label Content="Negative" HorizontalAlignment="Left" Margin="496,188,0,0" VerticalAlignment="Top" Foreground="White" Width="68"/>
+        <TextBox x:Name="accumulatorBox" HorizontalAlignment="Left" Height="23" Margin="346,94,0,0" TextWrapping="Wrap" Text="FF" VerticalAlignment="Top" Width="68"/>
+        <Label Content="Accumulator: " HorizontalAlignment="Left" Margin="269,90,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label Content="X:" HorizontalAlignment="Left" Margin="269,163,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <TextBox x:Name="XBox" HorizontalAlignment="Left" Height="23" Margin="293,167,0,0" TextWrapping="Wrap" Text="FF" VerticalAlignment="Top" Width="68"/>
+        <TextBox x:Name="YBox" HorizontalAlignment="Left" Height="23" Margin="293,199,0,0" TextWrapping="Wrap" Text="FF" VerticalAlignment="Top" Width="68"/>
+        <Label Content="Y:" HorizontalAlignment="Left" Margin="269,198,0,0" VerticalAlignment="Top" Foreground="White"/>
 
     </Grid>
 </Window>

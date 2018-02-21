@@ -49,19 +49,14 @@ namespace Sharpness
         private string GenerateString()
         {
             string finalmessage = "";
-            int size = 0;
 
             //Render a maximum of 120 messages on log
-            if (logMessages.Count > 120)
+            while (logMessages.Count > 200)
             {
-                size = 120;
-            }
-            else
-            {
-                size = logMessages.Count;
+                logMessages.RemoveAt(0);
             }
 
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < logMessages.Count; i++)
             {
                 finalmessage += logMessages[i] + "\n";
             }

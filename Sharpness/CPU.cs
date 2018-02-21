@@ -10,9 +10,12 @@ namespace Sharpness
     {
         //Internals
         public event Action<string> LogExternal;
-        public event Action<byte[], ushort> CpuStats;
+        public event Action<byte[], ushort, bool, bool, bool, bool, bool, bool, byte, byte, byte> CpuStats; //I know, this is ugly af
 
         // 6502 ---------------------------------------------
+        const int CPUfreq = 1789773;
+        private int cycles;
+
         // Acumulador
         private byte A;
 
@@ -34,90 +37,169 @@ namespace Sharpness
 
         // Flags
         private bool N, V, B, D, I, Z, C;
+        private bool NMIReq, ResetReq, IRQReq = false;
 
         // Auxiliar para decodificação do Opcode com mais de um argumento
         private ushort argop;
 
         public void Emulate()
         {
-            if(LogExternal != null)
+            if (LogExternal != null)
             {
+                LogExternal("");
                 LogExternal("Opcode: " + mem[PC].ToString("X2"));
                 LogExternal("PC: " + PC.ToString("X4"));
             }
 
-            if(CpuStats != null)
+            //Emulation routine begins
+            if (NMIReq)
             {
-                CpuStats(mem, PC);
+
+            }
+            if (IRQReq)
+            {
+                LogExternal("IRQ Handle");
+
             }
 
             switch (mem[PC])
             {
                 case 0x00:
-                    //txtDebug.Text += "BRK - Break | Implicit \n";
+                    LogExternal("BRK - Break | Implicit ");
                     PC += 1;
+                    PackCPUToByte();
+                    push16(PC);
+                    push(P);
+                    PC = (ushort)(read16(0xFFFD));
+                    B = true;
+
                     break;
 
                 case 0x01:
-                    //txtDebug.Text += "ORA - Bitwise OR with ACC | Indirect with X offset\n";
-                    PC += 2;
+                    LogExternal("ORA - Bitwise OR with ACC | Indirect with X offset -- Unreliable");
+                    PC += 1;
+                    byte hi = (byte)(mem[PC]);
+                    A = (byte)(A | mem[(hi << 8) | X]);
+                    checkZN(A);
+                    PC += 1;
                     break;
 
                 case 0x08:
-                    //txtDebug.Text += "PHP - Push Processor status (from stack?) | Implicit \n";
+                    LogExternal("PHP - Push Processor status (from stack?) | Implicit");
+                    PackCPUToByte();
+                    push(P);
                     PC += 1;
                     break;
 
                 case 0x09:
-                    //txtDebug.Text += "ORA - Bitwise OR with ACC | Relative\n";
-                    PC += 2;
+                    LogExternal("ORA - Bitwise OR with ACC | Immediate");
+                    PC += 1;
+                    A = (byte)(A | mem[PC]);
+                    checkZN(A);
+                    PC += 1;
                     break;
 
                 case 0x10:
-                    //txtDebug.Text += "BPL - Branch on Plus | Implicit \n";
-                    PC += 2;
+                    LogExternal("BPL - Branch on Plus | Implicit ");
+                    PC += 1;
+                    var offset = mem[PC];
+                    if (!N)
+                    {
+                        LogExternal("Jumped to " + (PC + offset) + " .");
+                        PC += offset;
+                    }
+                    PC += 1;
                     break;
 
                 case 0x18:
-                    //txtDebug.Text += "CLC - Clear Carry | Implicit \n";
+                    LogExternal("CLC - Clear Carry | Implicit");
                     C = false;
                     PC += 1;
                     break;
 
                 case 0x20:
-                    //txtDebug.Text += "JSR - Jump to Subroutine | Absolute\n";
-                    PC += 3;
+                    LogExternal("JSR - Jump to Subroutine | Absolute -- Unreliable execution order!");
+                    PC += 2;
+                    push16(PC);
+                    PC = read16(PC);
                     break;
 
                 case 0x21:
-                    //txtDebug.Text += "AND - Bitwise AND with ACC | Indirect with X Offset\n";
-                    PC += 2;
+                    LogExternal("AND - Bitwise AND with ACC | Indirect with X Offset");
+                    PC += 1;
+                    A = (byte)(A & mem[(ushort)((mem[PC] << 8) | X)]);
+                    checkZN(A);
+                    PC += 1;
                     break;
 
+                case 0x24:
+                    LogExternal("BIT - Bit Test | Zero Page");
+                    PC += 1;
+                    if((byte)(A & mem[(ushort)(mem[PC])]) == 0)
+                    {
+                        Z = true;
+                    }
+                    else
+                    {
+                        Z = false;
+                    }
+                    if ((mem[(ushort)(mem[PC])] & 0b10000000) == 0b10000000)
+                    {
+                        N = true;
+                    }
+                    else
+                    {
+                        N = false;
+                    }
+                    if ((mem[(ushort)(mem[PC])] & 0b01000000) == 0b01000000)
+                    {
+                        V = true;
+                    }
+                    else
+                    {
+                        V = false;
+                    }
+                        PC += 1;
+                    break;
 
                 case 0x25:
-                    //txtDebug.Text += "AND - Bitwise AND with ACC | Zero Page\n";
-                    PC += 2;
+                    LogExternal("AND - Bitwise AND with ACC | Zero Page");
+                    PC += 1;
+                    A = (byte)(A & mem[(ushort)(mem[PC])]);
+                    checkZN(A);
+                    PC += 1;
                     break;
 
                 case 0x28:
-                    //txtDebug.Text += "PLP - Pull Processor status (from stack?) | Implicit \n";
+                    LogExternal("PLP - Pull Processor status (from stack?) | Implicit");
+                    UnpackByteToCpu();
                     PC += 1;
                     break;
 
                 case 0x29:
-                    //txtDebug.Text += "AND - Bitwise AND with ACC | Immediate \n";
-                    PC += 2;
+                    LogExternal("AND - Bitwise AND with ACC | Immediate");
+                    PC += 1;
+                    A = (byte)(A & mem[PC]);
+                    checkZN(A);
+                    PC += 1;
                     break;
 
                 case 0x2D:
-                    //txtDebug.Text += "AND - Bitwise AND with ACC | Absolute \n";
+                    LogExternal("AND - Bitwise AND with ACC | Absolute ");
+                    A = (byte)(A & mem[read16(PC)]);
+                    checkZN(A);
                     PC += 3;
                     break;
 
                 case 0x30:
-                    //txtDebug.Text += "BMI - Branch on Minus | Implicit \n";
-                    PC += 2;
+                    LogExternal("BMI - Branch on Minus | Implicit ");
+                    PC += 1;
+                    if (N)
+                    {
+                        PC = (ushort)(PC + mem[PC]);
+                        LogExternal("Jumped to " + PC);
+                    }
+                    PC += 1;
                     break;
 
                 case 0x31:
@@ -187,7 +269,8 @@ namespace Sharpness
                     break;
 
                 case 0x4C:
-                    //txtDebug.Text += "JMP - Jump | Absolute \n";
+                    LogExternal("JMP - Jump | Absolute ");
+                    PC = mem[read16(PC)];
                     PC += 3;
                     break;
 
@@ -218,6 +301,8 @@ namespace Sharpness
 
                 case 0x58:
                     //txtDebug.Text += "CLI - Clear Interrupt | Implicit \n";
+                    I = false;
+                    LogExternal("Interrupt flag cleared.");
                     PC += 1;
                     break;
 
@@ -237,7 +322,8 @@ namespace Sharpness
                     break;
 
                 case 0x60:
-                    //txtDebug.Text += "RTS - Return from Subroutine | Implicit \n";
+                    LogExternal("RTS - Return from Subroutine | Implicit ");
+                    PC = pop16();
                     PC += 1;
                     break;
 
@@ -260,6 +346,8 @@ namespace Sharpness
                     //txtDebug.Text += "SEI - Set Interrupt | Implicit \n";
                     I = true;
                     PC += 1;
+                    cycles += 2;
+                    LogExternal("Set interrupt flag.");
                     break;
 
                 case 0x81:
@@ -274,14 +362,17 @@ namespace Sharpness
                     break;
 
                 case 0x85:
-                    //txtDebug.Text += "STA - Store Accumulator | Zero Page \n";
-                    PC += 2;
+                    LogExternal("STA - Store Accumulator | Zero Page ");
+                    PC += 1;
+                    mem[PC] = A;
+                    PC += 1;
                     break;
 
                 case 0x86:
-                    //txtDebug.Text += "STX - Store X Register | Zero Page";
-                    mem[PC + 1] = X; //Probably works like this. I gotta get used to the variables declared.
-                    PC += 2;
+                    LogExternal("STX - Store X Register | Zero Page");
+                    PC += 1;
+                    mem[PC] = X; //Probably works like this. I gotta get used to the variables declared.
+                    PC += 1;
                     break;
 
                 case 0x88:
@@ -300,7 +391,9 @@ namespace Sharpness
                     break;
 
                 case 0x8A:
-                    //txtDebug.Text += "TXA - Transfer X to A | Implied \n";
+                    LogExternal("TXA - Transfer X to A | Implied ");
+                    A = X;
+                    checkZN(A);
                     PC += 1;
                     break;
 
@@ -313,19 +406,32 @@ namespace Sharpness
 
                 case 0x8D:
                     //txtDebug.Text += "STA - Store Accumulator | Absolute \n";
-                    PC += 3;
+                    PC += 1;
+                    var val1 = mem[PC];
+                    PC += 1;
+                    var val2 = mem[PC];
+                    var value = (val1 << 8) | val2;
+                    mem[value] = A;
+                    LogExternal("Stored " + A + " on memory location $" + value.ToString("X2"));
+                    PC += 1;
                     break;
 
                 case 0x8E:
-                    //txtDebug.Text += "STX - Store X Register | Absolute";
+                    LogExternal("STX - Store X Register | Absolute");
                     argop = (ushort)((mem[PC + 1] << 8) + (mem[PC + 2]));
                     mem[argop] = X;
                     PC += 3;
                     break;
 
                 case 0x90:
-                    //txtDebug.Text += "BCC - Branch on Carry Clear | Implicit \n";
-                    PC += 2;
+                    LogExternal("BCC - Branch on Carry Clear | Implicit ");
+                    PC += 1;
+                    if (!C)
+                    {
+                        PC = (ushort)(PC + mem[PC]);
+                        LogExternal("Branching.");
+                    }
+                    PC += 1;
                     break;
 
                 case 0x91:
@@ -340,8 +446,12 @@ namespace Sharpness
                     break;
 
                 case 0x95:
-                    //txtDebug.Text += "STA - Store Accumulator | Zero Page with X offset \n";
-                    PC += 2;
+                    LogExternal("STA - Store Accumulator | Zero Page with X offset ");
+                    cycles += 4;
+                    PC += 1;
+                    value = mem[PC];
+                    PC += 1;
+                    A = mem[X | value];
                     break;
 
                 case 0x96:
@@ -361,12 +471,14 @@ namespace Sharpness
                     break;
 
                 case 0x9A:
-                    //txtDebug.Text += "TXS - Transfer X to Stack Pointer | Implied \n";
+                    LogExternal("TXS - Transfer X to Stack Pointer | Implied ");
+                    S = X;
                     PC += 1;
                     break;
 
                 case 0x9D:
-                    //txtDebug.Text += "STA - Store Accumulator | Absolute with X offset \n";
+                    LogExternal("STA - Store Accumulator | Absolute with X offset ");
+                    mem[read16(PC) | X] = A;
                     PC += 3;
                     break;
 
@@ -381,8 +493,12 @@ namespace Sharpness
                     break;
 
                 case 0xA2:
-                    //txtDebug.Text += "LDX - Load X | Immediate \n";
-                    PC += 2;
+                    LogExternal("LDX - Load X | Immediate");
+                    PC += 1;
+                    checkZN(mem[PC]);
+                    X = mem[PC];
+                    cycles += 2;
+                    PC += 1;
                     break;
 
                 case 0xA4:
@@ -391,8 +507,11 @@ namespace Sharpness
                     break;
 
                 case 0xA5:
-                    //txtDebug.Text += "LDA - Load Accumulator | Zero Page \n";
-                    PC += 2;
+                    LogExternal("LDA - Load Accumulator | Zero Page");
+                    PC += 1;
+                    A = mem[(ushort)(mem[PC])];
+                    checkZN(A);
+                    PC += 1;
                     break;
 
                 case 0xA6:
@@ -407,7 +526,11 @@ namespace Sharpness
 
                 case 0xA9:
                     //txtDebug.Text += "LDA - Load ACC | Immediate \n";
-                    PC += 2;
+                    PC += 1;
+                    checkZN(mem[PC]);
+                    LogExternal("Stored " + mem[PC] + " on accumulator.");
+                    A = mem[PC];
+                    PC += 1;
                     break;
 
                 case 0xAA:
@@ -422,7 +545,20 @@ namespace Sharpness
 
                 case 0xAD:
                     //txtDebug.Text += "LDA - Load ACC | Absolute \n";
-                    PC += 3;
+                    //Read 16 bytes of data
+                    PC += 1;
+                    var val1_ = mem[PC];
+                    PC += 1;
+                    var val2_ = mem[PC];
+                    var value_ = (val1_ << 8) + val2_;
+
+                    //Check affected flags
+                    checkZN(mem[value_]);
+
+                    A = mem[value_];
+                    LogExternal("Loaded " + mem[value_].ToString("X2") + " to accumulator.");
+                    PC += 1;
+                    cycles += 4;
                     break;
 
                 case 0xAE:
@@ -436,8 +572,11 @@ namespace Sharpness
                     break;
 
                 case 0xB1:
-                    //txtDebug.Text += "LDA - Load Accumulator | Indirect with Y offset \n";
-                    PC += 2;
+                    LogExternal("LDA - Load Accumulator | Indirect with Y offset");
+                    PC += 1;
+                    A = mem[(ushort)(((Y << 8) | (mem[PC] >> 8)))];
+                    checkZN(A);
+                    PC += 1;
                     break;
 
                 case 0xB4:
@@ -446,7 +585,9 @@ namespace Sharpness
                     break;
 
                 case 0xB5:
-                    //txtDebug.Text += "LDA - Load Accumulator | Zero Page with X offset \n";
+                    LogExternal("LDA - Load Accumulator | Zero Page with X offset --Unreliable operand");
+                    A = mem[(ushort)((PC + 1) + X)];
+                    checkZN(A);
                     PC += 2;
                     break;
 
@@ -477,8 +618,11 @@ namespace Sharpness
                     break;
 
                 case 0xBD:
-                    //txtDebug.Text += "LDA - Load ACC | Absolute, X \n";
-                    PC += 3;
+                    LogExternal("LDA - Load ACC | Absolute, X");
+                    A = mem[read16(PC) + X];
+                    PC += 2;
+                    checkZN(A);
+                    PC += 1;
                     break;
 
                 case 0xBE:
@@ -502,8 +646,10 @@ namespace Sharpness
                     break;
 
                 case 0xC5:
-                    //txtDebug.Text += "CMP - Compare Accumulator reg | Zero Page \n";
-                    PC += 2;
+                    LogExternal("CMP - Compare Accumulator reg | Zero Page ");
+                    PC += 1;
+                    compare(A, mem[PC]);
+                    PC += 1;
                     break;
 
                 case 0xC6:
@@ -528,7 +674,8 @@ namespace Sharpness
                     break;
 
                 case 0xC9:
-                    //txtDebug.Text += "CMP - Compare | Immediate \n";
+                    LogExternal("CMP - Compare | Immediate ");
+                    compare(A, mem[PC + 1]);
                     PC += 2;
                     break;
 
@@ -554,8 +701,14 @@ namespace Sharpness
                     break;
 
                 case 0xD0:
-                    //txtDebug.Text += "BNE - Branch on Not Equal (!=) | Implicit \n";
-                    PC += 2;
+                    LogExternal("BNE - Branch on Not Equal (!=) | Implicit");
+                    PC += 1;
+                    if (!Z)
+                    {
+                        PC = (ushort)(PC + mem[PC]);
+                        LogExternal("Branching.");
+                    }
+                    PC += 1;
                     break;
 
                 case 0xD1:
@@ -576,7 +729,9 @@ namespace Sharpness
                 case 0xD8:
                     //txtDebug.Text += "CLD - Clear decimal | Implicit \n";
                     D = false;
+                    LogExternal("Set decimal flag to zero.");
                     PC += 1;
+                    cycles += 2;
                     break;
 
                 case 0xD9:
@@ -586,7 +741,9 @@ namespace Sharpness
 
                 case 0xDD:
                     //txtDebug.Text += "CMP - Compare Accumulator reg | Absolute with X offset \n";
+                    compare(A, mem[read16((ushort)(PC + X))]);
                     PC += 3;
+                    LogExternal("CMP - Compare Accumulator reg | Absolute with X offset");
                     break;
 
                 case 0xDE:
@@ -610,7 +767,7 @@ namespace Sharpness
                     break;
 
                 case 0xE8:
-                    //txtDebug.Text += "INX - Increment X | Implied \n";
+                    LogExternal("INX - Increment X | Implied ");
                     X++;
 
                     // Set Zero flag
@@ -640,8 +797,14 @@ namespace Sharpness
                     break;
 
                 case 0xF0:
-                    //txtDebug.Text += "BEQ - Branch on Equal(==) | Implicit \n";
-                    PC += 2;
+                    LogExternal("BEQ - Branch on Equal(==) | Implicit ");
+                    PC += 1;
+                    if (C)
+                    {
+                        PC = (ushort)(PC + mem[PC]);
+                        LogExternal("Branching.");
+                    }
+                    PC += 1;
                     break;
 
                 case 0xF6:
@@ -661,8 +824,15 @@ namespace Sharpness
                     break;
 
                 default:
-                    //txtDebug.Text += "Undefined";
+                    LogExternal("WARNING ->> Unknown opcode: " + mem[PC]);
                     break;
+
+
+            }
+
+            if (CpuStats != null)
+            {
+                CpuStats(mem, PC, C, Z, I, D, V, N, X, Y, A);
             }
         }
 
@@ -682,6 +852,178 @@ namespace Sharpness
             for (int i = 0x0000; i < 0x07FF; i++)
             {
                 mem[i] = 0xFF;
+            }
+        }
+
+        //Helper functions
+
+        private void checkZN(byte value)
+        {
+            if (value == 0)
+            {
+                Z = true;
+            }
+            else
+            {
+                Z = false;
+            }
+
+            if ((value & 0b00000010) == 0b00000010)
+            {
+                N = true;
+            }
+            else
+            {
+                N = false;
+            }
+        }
+
+        private ushort read16(ushort PC)
+        {
+            var val1 = mem[PC + 1];
+            var val2 = mem[PC + 2];
+            ushort value = (ushort)((val1 << 8) | val2);
+            return value;
+
+        }
+
+        private void compare(byte var1, byte var2)
+        {
+            if (var1 >= var2)
+            {
+                C = true;
+            }
+            else
+            {
+                C = false;
+            }
+
+            if (var1 == var2)
+            {
+                Z = true;
+            }
+            else
+            {
+                Z = false;
+            }
+
+            if (((var1 - var2) & 0b00000010) == 0b00000010)
+            {
+                N = true;
+            }
+            else
+            {
+                N = false;
+            }
+        }
+
+        private void push16(ushort value)
+        {
+            byte hi = (byte)(value >> 8);
+            byte lo = (byte)(value & 0xFF);
+            push(hi);
+            push(lo);
+        }
+
+        private void push(byte value)
+        {
+            LogExternal("Pushed new value to stack.");
+            mem[0x100 | S] = value;
+            S--;
+        }
+
+        private byte pop()
+        {
+            S++;
+            return mem[0x100 | S];
+        }
+
+        private ushort pop16()
+        {
+            byte lo = pop();
+            byte hi = pop();
+            return (ushort)(hi << 8 | lo);
+        }
+
+        private byte PackCPUToByte()
+        {
+            //Packs the CPU state to a byte, can be pushed to stack pile
+            var n = 0;
+            var v = 0;
+            var b = 0;
+            var d = 0;
+            var i = 0;
+            var z = 0;
+            var c = 0;
+            if (N)
+            {
+                n = 1;
+            }
+            if (V)
+            {
+                v = 1;
+            }
+            if (B)
+            {
+                b = 1;
+            }
+            if (D)
+            {
+                d = 1;
+            }
+            if (I)
+            {
+                i = 1;
+            }
+            if (Z)
+            {
+                z = 1;
+            }
+            if (C)
+            {
+                c = 1;
+            }
+            P = (byte)((n << 7) | (v << 6) | (0 << 5) | (b << 4) | (d << 3) | (i << 2) | (z << 1) | c);
+            return (byte)((n << 7) | (v << 6) | (0 << 5) | (b << 4) | (d << 3) | (i << 2) | (z << 1) | c);
+        }
+
+        private void UnpackByteToCpu()
+        {
+            N = false;
+            V = false;
+            B = false;
+            D = false;
+            I = false;
+            Z = false;
+            C = false;
+            var states = pop();
+            if ((0b10000000 & states) == 0b10000000)
+            {
+                N = true;
+            }
+            if ((0b01000000 & states) == 0b01000000)
+            {
+                V = true;
+            }
+            if ((0b00010000 & states) == 0b00010000)
+            {
+                B = true;
+            }
+            if ((0b00001000 & states) == 0b00001000)
+            {
+                D = true;
+            }
+            if ((0b00000100 & states) == 0b00000100)
+            {
+                I = true;
+            }
+            if ((0b00000010 & states) == 0b00000010)
+            {
+                Z = true;
+            }
+            if ((0b00000001 & states) == 0b00000001)
+            {
+                C = true;
             }
         }
     }
